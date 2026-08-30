@@ -31,11 +31,19 @@ def _get_cors_origins() -> list[str]:
     return [origin.strip() for origin in env_value.split(",") if origin.strip()]
 
 
+def _get_cors_origin_regex() -> str | None:
+    env_value = os.getenv("CORS_ORIGIN_REGEX", "")
+    if not env_value:
+        return r"https://.*\.vercel\.app"
+    return env_value
+
+
 class Settings(BaseModel):
     app_name: str = "Fraud Detection API"
     environment: str = Field(default_factory=lambda: os.getenv("APP_ENV", "development"))
     database_url: str = Field(default_factory=_get_database_url)
     cors_origins: list[str] = Field(default_factory=_get_cors_origins)
+    cors_origin_regex: str | None = Field(default_factory=_get_cors_origin_regex)
 
 
 settings = Settings()
