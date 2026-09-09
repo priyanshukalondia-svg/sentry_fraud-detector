@@ -178,18 +178,21 @@ async def stats():
 async def timeseries(hours: int = 72):
     now = datetime.utcnow()
     start = now - timedelta(hours=hours)
+    bucket_step = timedelta(minutes=5)
     buckets = defaultdict(lambda: {"volume": 0, "flagged": 0, "amount": 0.0})
 
     current = start.replace(second=0, microsecond=0)
-    while current <= now:
-        buckets[current.strftime("%Y-%m-%dT%H:%M")] = {"volume": 0, "flagged": 0, "amount": 0.0}
-        current += timedelta(minutes=1)
+    rounded = current - timedelta(minutes=current.minute % 5)
+    while rounded <= now:
+        buckets[rounded.strftime("%Y-%m-%dT%H:%M")] = {"volume": 0, "flagged": 0, "amount": 0.0}
+        rounded += bucket_step
 
     for t in TRANSACTIONS:
         ts = datetime.fromisoformat(t["timestamp"].replace("Z", ""))
         if ts < start:
             continue
-        bucket_key = ts.strftime("%Y-%m-%dT%H:%M")
+        bucket_dt = ts - timedelta(minutes=ts.minute % 5, seconds=ts.second, microseconds=ts.microsecond)
+        bucket_key = bucket_dt.strftime("%Y-%m-%dT%H:%M")
         if bucket_key not in buckets:
             buckets[bucket_key] = {"volume": 0, "flagged": 0, "amount": 0.0}
         buckets[bucket_key]["volume"] += 1

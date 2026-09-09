@@ -9,14 +9,17 @@ import { api, useLiveFeed } from "./api";
 
 const REFRESH_MS = 6000;
 
-function minuteBucketKey(iso) {
+function bucketKey(iso) {
   const dt = new Date(iso);
+  const roundedMinutes = Math.floor(dt.getUTCMinutes() / 5) * 5;
   const utc = new Date(Date.UTC(
     dt.getUTCFullYear(),
     dt.getUTCMonth(),
     dt.getUTCDate(),
     dt.getUTCHours(),
-    dt.getUTCMinutes()
+    roundedMinutes,
+    0,
+    0
   ));
   return utc.toISOString().slice(0, 16);
 }
@@ -24,7 +27,7 @@ function minuteBucketKey(iso) {
 function mergeLiveTransactionIntoSeries(series, txn) {
   if (!txn?.timestamp) return series;
 
-  const key = minuteBucketKey(txn.timestamp);
+  const key = bucketKey(txn.timestamp);
   const next = [...series];
   const index = next.findIndex((item) => item.hour === key);
   const isFlagged = ["high", "critical"].includes(txn.risk_band);
