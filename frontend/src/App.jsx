@@ -9,6 +9,43 @@ import { api, useLiveFeed } from "./api";
 
 const REFRESH_MS = 6000;
 
+function hourBucketKey(iso) {
+  const dt = new Date(iso);
+  return new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate(), dt.getUTCHours())).toISOString().slice(0, 13) + ":00";
+}
+
+function mergeLiveTransactionIntoSeries(series, txn) {
+  if (!txn?.timestamp) return series;
+
+  const key = hourBucketKey(txn.timestamp);
+  const next = [...series];
+  const index = next.findIndex((item) => item.hour === key);
+  const isFlagged = ["high", "critical"].includes(txn.risk_band);
+
+  if (index >= 0) {
+    const item = next[index];
+    const volume = item.volume + 1;
+    next[index] = {
+      ...item,
+      volume,
+      flagged: item.flagged + (isFlagged ? 1 : 0),
+      fraud_rate_pct: volume ? (item.flagged + (isFlagged ? 1 : 0)) / volume * 100 : 0,
+      amount: (item.amount || 0) + (txn.amount || 0),
+    };
+    return next.slice(-180);
+  }
+
+  next.push({
+    hour: key,
+    volume: 1,
+    flagged: isFlagged ? 1 : 0,
+    fraud_rate_pct: isFlagged ? 100 : 0,
+    amount: txn.amount || 0,
+  });
+
+  return next.slice(-180).sort((a, b) => a.hour.localeCompare(b.hour));
+}
+
 export default function App() {
   const [view, setView] = useState("overview");
   const [stats, setStats] = useState(null);
@@ -93,9 +130,10 @@ export default function App() {
     }
   }, [view, refreshAlerts]);
 
-  // Live WebSocket feed for the overview ticker
+  // Live WebSocket feed for the overview ticker and the chart
   const { connected } = useLiveFeed((txn) => {
     setLiveItems((prev) => [txn, ...prev].slice(0, 30));
+    setTimeseries((prev) => mergeLiveTransactionIntoSeries(prev, txn));
   });
 
   const handleReview = async (id, decision) => {
