@@ -221,14 +221,13 @@ export default function App() {
         </main>
       </div>
 
-        {selectedTxn && (
-          <TransactionDrawer
-            txn={selectedTxn}
-            onClose={() => setSelectedTxn(null)}
-            onReview={selectedTxn.status === "pending" ? handleReview : null}
-          />
-        )}
-      </div>
+      {selectedTxn && (
+        <TransactionDrawer
+          txn={selectedTxn}
+          onClose={() => setSelectedTxn(null)}
+          onReview={selectedTxn.status === "pending" ? handleReview : null}
+        />
+      )}
     </div>
   );
 }
