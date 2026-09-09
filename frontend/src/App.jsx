@@ -157,11 +157,11 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-void text-text-primary font-body flex justify-center px-2 py-2">
-      <div className="w-[90%] max-w-[1700px] min-h-screen flex">
+    <div className="min-h-screen bg-void text-text-primary font-body flex justify-center px-2 py-2 overflow-x-hidden">
+      <div className="w-[90%] max-w-[1700px] min-h-screen flex overflow-x-hidden">
         <Sidebar active={view} onNavigate={handleNavigate} pendingCount={stats?.pending_review || 0} />
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 overflow-x-hidden">
         <TopBar
           view={view}
           connected={connected}

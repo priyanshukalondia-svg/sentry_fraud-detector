@@ -29,10 +29,10 @@ function CustomTooltip({ active, payload, label }) {
 }
 
 export default function VolumeChart({ data = [] }) {
-  const chartMinWidth = Math.max(Math.min((data.length || 1) * 3, 2200), 1100);
+  const chartMinWidth = Math.max((data.length || 1) * 3, 1000);
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-hidden">
       <div style={{ minWidth: `${chartMinWidth}px` }}>
         <ResponsiveContainer width="100%" height={260}>
           <ComposedChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
