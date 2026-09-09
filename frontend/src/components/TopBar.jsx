@@ -9,10 +9,10 @@ const VIEW_TITLES = {
 export default function TopBar({ view, connected, avgRisk, search, onSearch }) {
   const [title, subtitle] = VIEW_TITLES[view] || ["", ""];
   return (
-    <header className="sticky top-0 z-20 flex items-center justify-between gap-6 px-8 py-5 border-b border-hairline bg-void/85 backdrop-blur-md">
+    <header className="sticky top-0 z-20 flex items-center justify-between gap-6 px-6 py-4 border-b border-hairline bg-void/85 backdrop-blur-md">
       <div>
-        <h1 className="font-display text-xl font-semibold text-text-primary tracking-tight">{title}</h1>
-        <p className="text-xs text-text-dim mt-0.5">{subtitle}</p>
+        <h1 className="font-display text-[18px] font-semibold text-text-primary tracking-tight leading-none">{title}</h1>
+        <p className="text-xs text-text-dim mt-1">{subtitle}</p>
       </div>
 
       <div className="flex items-center gap-5">

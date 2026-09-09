@@ -11,8 +11,8 @@ export default function Overview({ stats, timeseries, distribution, categories, 
   const volDelta = stats.volume_prev_24h ? ((stats.volume_last_24h - stats.volume_prev_24h) / stats.volume_prev_24h) * 100 : 0;
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-[1fr_300px] gap-6">
-      <div className="space-y-6">
+    <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] gap-5">
+      <div className="space-y-5">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <KpiCard
             label="Fraud Rate (24h)"
@@ -66,7 +66,7 @@ export default function Overview({ stats, timeseries, distribution, categories, 
         </div>
       </div>
 
-      <div className="bg-panel border border-hairline rounded-lg p-4 h-[calc(100vh-140px)] sticky top-24">
+      <div className="bg-panel border border-hairline rounded-lg p-4 h-[calc(100vh-116px)] sticky top-20">
         <LiveTicker items={liveItems} onSelect={onSelectTxn} />
       </div>
     </div>

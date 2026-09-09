@@ -157,11 +157,10 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-void text-text-primary font-body flex justify-center px-2 py-2 overflow-x-hidden">
-      <div className="w-[90%] max-w-[1700px] min-h-screen flex overflow-x-hidden">
-        <Sidebar active={view} onNavigate={handleNavigate} pendingCount={stats?.pending_review || 0} />
+    <div className="min-h-screen bg-void text-text-primary font-body flex overflow-x-hidden">
+      <Sidebar active={view} onNavigate={handleNavigate} pendingCount={stats?.pending_review || 0} />
 
-        <div className="flex-1 min-w-0 overflow-x-hidden">
+      <div className="flex-1 min-w-0">
         <TopBar
           view={view}
           connected={connected}
@@ -173,7 +172,7 @@ export default function App() {
           }}
         />
 
-        <main className="px-8 py-6">
+        <main className="px-6 py-5">
           {apiError && (
             <div className="mb-5 bg-signal-critical/10 border border-signal-critical/30 rounded-lg px-4 py-3 text-sm text-signal-critical">
               Can't reach the backend at <span className="font-mono">localhost:8000</span>. Make sure the FastAPI
