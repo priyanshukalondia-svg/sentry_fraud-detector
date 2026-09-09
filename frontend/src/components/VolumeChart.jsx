@@ -29,7 +29,7 @@ function CustomTooltip({ active, payload, label }) {
 }
 
 export default function VolumeChart({ data = [] }) {
-  const chartMinWidth = Math.max((data.length || 1) * 6, 1800);
+  const chartMinWidth = Math.max(Math.min((data.length || 1) * 3, 2200), 1100);
 
   return (
     <div className="overflow-x-auto">

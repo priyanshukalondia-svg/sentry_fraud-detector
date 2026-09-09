@@ -158,7 +158,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-void text-text-primary font-body flex justify-center px-2 py-2">
-      <div className="w-[90vw] max-w-[1800px] min-h-screen flex">
+      <div className="w-[90%] max-w-[1700px] min-h-screen flex">
         <Sidebar active={view} onNavigate={handleNavigate} pendingCount={stats?.pending_review || 0} />
 
         <div className="flex-1 min-w-0">

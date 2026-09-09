@@ -177,20 +177,28 @@ async def stats():
 @app.get("/api/timeseries")
 async def timeseries(hours: int = 72):
     now = datetime.utcnow()
+    start = now - timedelta(hours=hours)
     buckets = defaultdict(lambda: {"volume": 0, "flagged": 0, "amount": 0.0})
+
+    current = start.replace(second=0, microsecond=0)
+    while current <= now:
+        buckets[current.strftime("%Y-%m-%dT%H:%M")] = {"volume": 0, "flagged": 0, "amount": 0.0}
+        current += timedelta(minutes=1)
+
     for t in TRANSACTIONS:
         ts = datetime.fromisoformat(t["timestamp"].replace("Z", ""))
-        if ts < now - timedelta(hours=hours):
+        if ts < start:
             continue
         bucket_key = ts.strftime("%Y-%m-%dT%H:%M")
+        if bucket_key not in buckets:
+            buckets[bucket_key] = {"volume": 0, "flagged": 0, "amount": 0.0}
         buckets[bucket_key]["volume"] += 1
         buckets[bucket_key]["amount"] += t["amount"]
         if t["risk_band"] in ("high", "critical"):
             buckets[bucket_key]["flagged"] += 1
 
-    keys = sorted(buckets.keys())
     series = []
-    for k in keys:
+    for k in sorted(buckets.keys()):
         b = buckets[k]
         series.append({
             "hour": k,
