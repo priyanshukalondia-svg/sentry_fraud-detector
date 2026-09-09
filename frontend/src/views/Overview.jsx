@@ -49,7 +49,7 @@ export default function Overview({ stats, timeseries, distribution, categories, 
               <span className="flex items-center gap-1.5"><span className="w-2 h-0.5 bg-signal-high inline-block" /> Fraud rate</span>
             </div>
           </div>
-          <p className="text-xs text-text-dim mb-2">Last 72 hours, minute buckets</p>
+          <p className="text-xs text-text-dim mb-2">Last 30 minutes, 5-minute buckets</p>
           <VolumeChart data={timeseries} />
         </div>
 

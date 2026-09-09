@@ -82,7 +82,7 @@ export default function App() {
     try {
       const [s, ts, dist, cats] = await Promise.all([
         api.stats(),
-        api.timeseries(72),
+        api.timeseries(0.5),
         api.riskDistribution(),
         api.categoryBreakdown(),
       ]);

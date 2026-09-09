@@ -187,7 +187,7 @@ async def stats():
 
 
 @app.get("/api/timeseries")
-async def timeseries(hours: int = 72):
+async def timeseries(hours: float = 72):
     if not TRANSACTIONS:
         _ensure_seed_data()
     now = datetime.utcnow()
