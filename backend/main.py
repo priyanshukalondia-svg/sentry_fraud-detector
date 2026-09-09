@@ -50,6 +50,19 @@ def _ensure_model_ready():
         print("Model trained:", metrics)
 
 
+def _ensure_seed_data():
+    global TRANSACTIONS
+    TRANSACTIONS = fetch_all_transactions()
+    if TRANSACTIONS:
+        return TRANSACTIONS
+
+    print("Generating historical transaction backlog...")
+    history = gen.generate_batch(6000, span_hours=12)
+    _enrich_and_store(history)
+    TRANSACTIONS = fetch_all_transactions()
+    return TRANSACTIONS
+
+
 def _enrich_and_store(raw_txns):
     _ensure_model_ready()
     scored = model.score(raw_txns)
@@ -73,27 +86,24 @@ async def startup():
     init_db()
     _ensure_model_ready()
     global TRANSACTIONS
-    TRANSACTIONS = fetch_all_transactions()
-
-    if not TRANSACTIONS:
-        print("Generating historical transaction backlog...")
-        history = gen.generate_batch(1400, span_hours=72)
-        _enrich_and_store(history)
-        TRANSACTIONS = fetch_all_transactions()
-    else:
-        print("Loaded transactions from database.")
-
+    TRANSACTIONS = _ensure_seed_data()
+    if TRANSACTIONS:
+        print(f"Loaded {len(TRANSACTIONS)} transactions from the database.")
     asyncio.create_task(_live_feed_loop())
 
 
 async def _live_feed_loop():
     """Periodically generate a new transaction and broadcast it to connected clients."""
     while True:
-        await asyncio.sleep(random.uniform(1.5, 4.0))
+        if not TRANSACTIONS:
+            _ensure_seed_data()
+        await asyncio.sleep(random.uniform(0.8, 2.0))
         txn, is_fraud, fraud_type = gen.generate_transaction(ts=datetime.utcnow())
         txn["_is_fraud_ground_truth"] = is_fraud
         txn["_fraud_type_ground_truth"] = fraud_type
         _enrich_and_store([txn])
+        if not TRANSACTIONS:
+            TRANSACTIONS = fetch_all_transactions()
         enriched = TRANSACTIONS[0]
         dead = set()
         for ws in ws_clients:
@@ -137,6 +147,8 @@ async def model_metrics():
 @app.get("/api/stats")
 async def stats():
     if not TRANSACTIONS:
+        _ensure_seed_data()
+    if not TRANSACTIONS:
         return {}
     total = len(TRANSACTIONS)
     critical = sum(1 for t in TRANSACTIONS if t["risk_band"] == "critical")
@@ -176,6 +188,8 @@ async def stats():
 
 @app.get("/api/timeseries")
 async def timeseries(hours: int = 72):
+    if not TRANSACTIONS:
+        _ensure_seed_data()
     now = datetime.utcnow()
     start = now - timedelta(hours=hours)
     bucket_step = timedelta(minutes=5)
