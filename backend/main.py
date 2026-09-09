@@ -182,7 +182,7 @@ async def timeseries(hours: int = 72):
         ts = datetime.fromisoformat(t["timestamp"].replace("Z", ""))
         if ts < now - timedelta(hours=hours):
             continue
-        bucket_key = ts.strftime("%Y-%m-%dT%H:00")
+        bucket_key = ts.strftime("%Y-%m-%dT%H:%M")
         buckets[bucket_key]["volume"] += 1
         buckets[bucket_key]["amount"] += t["amount"]
         if t["risk_band"] in ("high", "critical"):

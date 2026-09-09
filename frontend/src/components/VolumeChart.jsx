@@ -1,8 +1,14 @@
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Line, ComposedChart } from "recharts";
 
-function fmtHour(h) {
+function fmtMinute(h) {
   const d = new Date(h + ":00Z");
-  return d.toLocaleString("en-US", { hour: "numeric", hour12: true, month: "short", day: "numeric" }).replace(",", "");
+  return d.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).replace(",", "");
 }
 
 function CustomTooltip({ active, payload, label }) {
@@ -11,7 +17,7 @@ function CustomTooltip({ active, payload, label }) {
   const rate = payload.find((p) => p.dataKey === "fraud_rate_pct")?.value ?? 0;
   return (
     <div className="bg-panel-raised border border-hairline-bright rounded-md px-3 py-2 shadow-xl">
-      <div className="text-[10px] text-text-dim font-mono mb-1">{fmtHour(label)}</div>
+      <div className="text-[10px] text-text-dim font-mono mb-1">{fmtMinute(label)}</div>
       <div className="text-xs text-text-primary font-mono">
         <span className="text-cyan-glow">{volume}</span> transactions
       </div>
@@ -23,7 +29,7 @@ function CustomTooltip({ active, payload, label }) {
 }
 
 export default function VolumeChart({ data = [] }) {
-  const chartMinWidth = Math.max((data.length || 1) * 52, 900);
+  const chartMinWidth = Math.max((data.length || 1) * 6, 1800);
 
   return (
     <div className="overflow-x-auto">
@@ -39,11 +45,11 @@ export default function VolumeChart({ data = [] }) {
             <CartesianGrid stroke="#1A2029" vertical={false} />
             <XAxis
               dataKey="hour"
-              tickFormatter={fmtHour}
+              tickFormatter={fmtMinute}
               tick={{ fill: "#545D70", fontSize: 10, fontFamily: "JetBrains Mono" }}
               axisLine={{ stroke: "#232A38" }}
               tickLine={false}
-              minTickGap={20}
+              minTickGap={40}
               interval={0}
             />
             <YAxis yAxisId="left" tick={{ fill: "#545D70", fontSize: 10, fontFamily: "JetBrains Mono" }} axisLine={false} tickLine={false} width={30} />

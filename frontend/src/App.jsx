@@ -9,15 +9,22 @@ import { api, useLiveFeed } from "./api";
 
 const REFRESH_MS = 6000;
 
-function hourBucketKey(iso) {
+function minuteBucketKey(iso) {
   const dt = new Date(iso);
-  return new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate(), dt.getUTCHours())).toISOString().slice(0, 13) + ":00";
+  const utc = new Date(Date.UTC(
+    dt.getUTCFullYear(),
+    dt.getUTCMonth(),
+    dt.getUTCDate(),
+    dt.getUTCHours(),
+    dt.getUTCMinutes()
+  ));
+  return utc.toISOString().slice(0, 16);
 }
 
 function mergeLiveTransactionIntoSeries(series, txn) {
   if (!txn?.timestamp) return series;
 
-  const key = hourBucketKey(txn.timestamp);
+  const key = minuteBucketKey(txn.timestamp);
   const next = [...series];
   const index = next.findIndex((item) => item.hour === key);
   const isFlagged = ["high", "critical"].includes(txn.risk_band);
@@ -25,14 +32,15 @@ function mergeLiveTransactionIntoSeries(series, txn) {
   if (index >= 0) {
     const item = next[index];
     const volume = item.volume + 1;
+    const flagged = item.flagged + (isFlagged ? 1 : 0);
     next[index] = {
       ...item,
       volume,
-      flagged: item.flagged + (isFlagged ? 1 : 0),
-      fraud_rate_pct: volume ? (item.flagged + (isFlagged ? 1 : 0)) / volume * 100 : 0,
+      flagged,
+      fraud_rate_pct: volume ? (flagged / volume) * 100 : 0,
       amount: (item.amount || 0) + (txn.amount || 0),
     };
-    return next.slice(-180);
+    return next.sort((a, b) => a.hour.localeCompare(b.hour));
   }
 
   next.push({
@@ -43,7 +51,7 @@ function mergeLiveTransactionIntoSeries(series, txn) {
     amount: txn.amount || 0,
   });
 
-  return next.slice(-180).sort((a, b) => a.hour.localeCompare(b.hour));
+  return next.sort((a, b) => a.hour.localeCompare(b.hour));
 }
 
 export default function App() {
@@ -149,10 +157,11 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-void text-text-primary font-body flex">
-      <Sidebar active={view} onNavigate={handleNavigate} pendingCount={stats?.pending_review || 0} />
+    <div className="min-h-screen bg-void text-text-primary font-body flex justify-center px-2 py-2">
+      <div className="w-[90vw] max-w-[1800px] min-h-screen flex">
+        <Sidebar active={view} onNavigate={handleNavigate} pendingCount={stats?.pending_review || 0} />
 
-      <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0">
         <TopBar
           view={view}
           connected={connected}
@@ -213,13 +222,14 @@ export default function App() {
         </main>
       </div>
 
-      {selectedTxn && (
-        <TransactionDrawer
-          txn={selectedTxn}
-          onClose={() => setSelectedTxn(null)}
-          onReview={selectedTxn.status === "pending" ? handleReview : null}
-        />
-      )}
+        {selectedTxn && (
+          <TransactionDrawer
+            txn={selectedTxn}
+            onClose={() => setSelectedTxn(null)}
+            onReview={selectedTxn.status === "pending" ? handleReview : null}
+          />
+        )}
+      </div>
     </div>
   );
 }
