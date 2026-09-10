@@ -218,8 +218,7 @@ export default function App() {
         <main className="px-6 py-5">
           {apiError && (
             <div className="mb-5 bg-signal-critical/10 border border-signal-critical/30 rounded-lg px-4 py-3 text-sm text-signal-critical">
-              Can't reach the backend at <span className="font-mono">localhost:8000</span>. Make sure the FastAPI
-              server is running (see README).
+              Can't reach the backend at <span className="font-mono">{new URL(API_BASE).host}</span>. Make sure the API is responding and the deployment is healthy.
             </div>
           )}
 

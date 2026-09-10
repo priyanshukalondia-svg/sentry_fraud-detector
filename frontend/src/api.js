@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 
-const DEFAULT_API_BASE = "http://localhost:8000";
+const DEFAULT_API_BASE = "https://fraud-detection-scheme.onrender.com";
 export const API_BASE = (import.meta.env.VITE_API_BASE_URL || DEFAULT_API_BASE).replace(/\/$/, "");
 
 const DEFAULT_WS_URL = `${API_BASE.startsWith("https") ? "wss" : "ws"}://${new URL(API_BASE).host}/ws/live`;

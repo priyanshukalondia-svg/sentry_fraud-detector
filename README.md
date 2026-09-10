@@ -82,6 +82,13 @@ It includes:
 - Tailwind CSS
 - Recharts
 
+## Deployed app
+
+The project is already deployed and running here:
+
+- Backend: https://fraud-detection-scheme.onrender.com/
+- Frontend: https://fraudfrontend-ekzm0s5r8-priyanshukalondia-8616s-projects.vercel.app/
+
 ## Local setup
 
 ### Prerequisites
@@ -128,17 +135,13 @@ npm install
 npm run dev -- --host 0.0.0.0 --port 5173
 ```
 
-If port 5173 is already in use, Vite will usually move to the next available port such as 5174. Open the port shown in the terminal, typically:
+If you want to use the deployed backend from a local frontend, configure the frontend environment variable:
 
-```text
-http://localhost:5173
+```bash
+VITE_API_BASE_URL=https://fraud-detection-scheme.onrender.com
 ```
 
-or
-
-```text
-http://localhost:5174
-```
+For local-only development, the default app is still compatible with `http://localhost:5173` and `http://localhost:8000` when you run both services locally.
 
 ## API endpoints
 
