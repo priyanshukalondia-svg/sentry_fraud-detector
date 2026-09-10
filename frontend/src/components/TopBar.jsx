@@ -4,9 +4,10 @@ const VIEW_TITLES = {
   overview: ["Overview", "Live signal across all processed transactions"],
   transactions: ["Transactions", "Search and inspect every scored transaction"],
   alerts: ["Alert Queue", "High and critical risk transactions awaiting review"],
+  "insert-data": ["Insert Data", "Upload a CSV or Excel file to replace live synthetic traffic"],
 };
 
-export default function TopBar({ view, connected, avgRisk, search, onSearch }) {
+export default function TopBar({ view, connected, avgRisk, search, onSearch, manualMode }) {
   const [title, subtitle] = VIEW_TITLES[view] || ["", ""];
   return (
     <header className="sticky top-0 z-20 flex items-center justify-between gap-6 px-6 py-4 border-b border-hairline bg-void/85 backdrop-blur-md">
@@ -32,9 +33,9 @@ export default function TopBar({ view, connected, avgRisk, search, onSearch }) {
         )}
 
         <div className="flex items-center gap-2 pl-1">
-          <span className={`w-1.5 h-1.5 rounded-full ${connected ? "bg-signal-low animate-pulse-dot" : "bg-signal-critical"}`} />
+          <span className={`w-1.5 h-1.5 rounded-full ${manualMode ? "bg-signal-warning" : connected ? "bg-signal-low animate-pulse-dot" : "bg-signal-critical"}`} />
           <span className="text-[11px] font-mono text-text-muted uppercase tracking-wide">
-            {connected ? "Live" : "Reconnecting"}
+            {manualMode ? "Manual" : connected ? "Live" : "Reconnecting"}
           </span>
         </div>
 

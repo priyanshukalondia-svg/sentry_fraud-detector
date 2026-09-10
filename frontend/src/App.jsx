@@ -5,6 +5,7 @@ import Overview from "./views/Overview";
 import TransactionsTable from "./components/TransactionsTable";
 import AlertQueue from "./components/AlertQueue";
 import TransactionDrawer from "./components/TransactionDrawer";
+import InsertData from "./views/InsertData";
 import { api, useLiveFeed } from "./api";
 
 const REFRESH_MS = 6000;
@@ -67,6 +68,9 @@ export default function App() {
   const [selectedTxn, setSelectedTxn] = useState(null);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(false);
+  const [manualMode, setManualMode] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   // Transactions view state
   const [txnPage, setTxnPage] = useState({ items: [], total: 0 });
@@ -154,6 +158,41 @@ export default function App() {
     refreshOverview();
   };
 
+  const handleUpload = async (file) => {
+    setUploading(true);
+    setUploadMessage("");
+    try {
+      const result = await api.uploadTransactions(file);
+      setManualMode(true);
+      setUploadMessage(result.message || "File imported successfully.");
+      setView("overview");
+      await refreshOverview();
+      const txRes = await api.transactions({ limit, offset, search: search || undefined });
+      setTxnPage(txRes);
+      const alertRes = await api.alerts(50);
+      setAlertItems(alertRes.items);
+      setSelectedTxn(null);
+    } catch (error) {
+      setApiError(true);
+      setUploadMessage(error.message || "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleRestoreLive = async () => {
+    try {
+      await api.resumeLiveGeneration();
+      setManualMode(false);
+      setUploadMessage("Live transaction generation has resumed.");
+      setView("overview");
+      await refreshOverview();
+    } catch (error) {
+      setApiError(true);
+      setUploadMessage(error.message || "Could not resume live generation.");
+    }
+  };
+
   const handleNavigate = (v) => {
     setView(v);
     setOffset(0);
@@ -169,6 +208,7 @@ export default function App() {
           connected={connected}
           avgRisk={stats?.avg_risk_score || 0}
           search={search}
+          manualMode={manualMode}
           onSearch={(v) => {
             setSearch(v);
             setOffset(0);
@@ -218,6 +258,16 @@ export default function App() {
 
               {view === "alerts" && (
                 <AlertQueue items={alertItems} onReview={handleReview} onSelect={setSelectedTxn} />
+              )}
+
+              {view === "insert-data" && (
+                <InsertData
+                  onUpload={handleUpload}
+                  uploading={uploading}
+                  lastMessage={uploadMessage}
+                  manualMode={manualMode}
+                  onRestoreLive={handleRestoreLive}
+                />
               )}
             </>
           )}

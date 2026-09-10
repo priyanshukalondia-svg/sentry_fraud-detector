@@ -31,6 +31,16 @@ export const api = {
     fetch(`${API_BASE}/api/transactions/${id}/review?decision=${decision}`, { method: "POST" }).then((r) =>
       r.json()
     ),
+  stopLiveGeneration: () => fetch(`${API_BASE}/api/data/stop-live-generation`, { method: "POST" }).then((r) => r.json()),
+  resumeLiveGeneration: () => fetch(`${API_BASE}/api/data/resume-live-generation`, { method: "POST" }).then((r) => r.json()),
+  uploadTransactions: async (file) => {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${API_BASE}/api/data/upload`, { method: "POST", body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Upload failed");
+    return data;
+  },
 };
 
 /**

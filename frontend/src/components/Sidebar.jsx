@@ -2,6 +2,7 @@ const NAV_ITEMS = [
   { id: "overview", label: "Overview", icon: OverviewIcon },
   { id: "transactions", label: "Transactions", icon: TxnIcon },
   { id: "alerts", label: "Alert Queue", icon: AlertIcon },
+  { id: "insert-data", label: "Insert Data", icon: UploadIcon },
 ];
 
 export default function Sidebar({ active, onNavigate, pendingCount }) {
@@ -81,6 +82,15 @@ function AlertIcon({ active }) {
       <path d="M8 2L14.5 13.5H1.5L8 2Z" stroke={active ? "#22D3EE" : "currentColor"} strokeWidth="1.5" strokeLinejoin="round" />
       <path d="M8 6.5V9.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
       <circle cx="8" cy="11.5" r="0.75" fill="currentColor" />
+    </svg>
+  );
+}
+
+function UploadIcon({ active }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <path d="M8 2V10M5.5 7.5L8 5L10.5 7.5" stroke={active ? "#22D3EE" : "currentColor"} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M3 12.5V12C3 10.9 3.9 10 5 10H11C12.1 10 13 10.9 13 12V12.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
 }
