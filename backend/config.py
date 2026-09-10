@@ -13,6 +13,8 @@ def _get_cors_origins() -> list[str]:
     default_origins = [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5174",
         "http://localhost:3000",
         "http://127.0.0.1:3000",
     ]
@@ -34,7 +36,7 @@ def _get_cors_origins() -> list[str]:
 def _get_cors_origin_regex() -> str | None:
     env_value = os.getenv("CORS_ORIGIN_REGEX", "")
     if not env_value:
-        return r"https://.*\.vercel\.app"
+        return r"https?://(localhost|127\.0\.0\.1):(5173|5174|3000|4173|8080)"
     return env_value
 
 

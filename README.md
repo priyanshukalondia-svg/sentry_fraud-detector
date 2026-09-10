@@ -1,19 +1,8 @@
 # Sentry — Fraud Detection Console
 
-Sentry is a local fraud operations dashboard designed to simulate how a modern digital commerce team might monitor, investigate, and action suspicious transactions in near real time. The project combines a Python FastAPI backend, synthetic transaction generation, explainable ML risk scoring, and a React-based monitoring interface.
+Sentry is a fraud-monitoring dashboard and ML demo that simulates an operations center for reviewing suspicious digital transactions in near real time. The project combines a Python FastAPI backend, synthetic transaction generation, model-based risk scoring, and a React dashboard for live monitoring and intervention.
 
-The system is built as a portfolio-ready prototype that demonstrates the full flow from transaction generation to signal scoring, database persistence, API exposure, and live operational visualization.
-
-## Product overview
-
-This project models a fraud monitoring workflow for a retail and digital payments environment. It generates synthetic transactions across common merchant categories, scores each one for fraud risk, and surfaces the most suspicious events for review through a live operational dashboard.
-
-The application includes:
-- a live transaction feed
-- real-time risk calculations and operational KPIs
-- transaction search and filtering
-- a review queue for high-risk events
-- explainable signal-based reasoning for flagged transactions
+This version of the project includes the full workflow for synthetic generation, manual import, review queue handling, and operational KPI tracking.
 
 ## Live dashboard
 
@@ -29,86 +18,109 @@ The application includes:
 
 ![Alert queue](docs/screenshots/alerts.png)
 
-## Key features
+## What the app does
 
-### Fraud risk scoring
-- Synthetic transaction data is generated with realistic fraud patterns such as high-velocity spending, device mismatch, abnormal merchant activity, and risky user behavior.
-- A scikit-learn model is trained on labeled synthetic data and combined with anomaly detection to produce a 0–100 risk score.
-- Scores are translated into operational risk bands: low, medium, high, and critical.
+- Streams a live transaction feed from the backend over WebSockets
+- Scores transactions using a trained fraud-risk model and anomaly logic
+- Shows operational KPIs for volume, amount, fraud rate, and pending reviews
+- Surfaces high-risk records in an alert queue for analyst review
+- Supports manual import of CSV/XLSX/XLS data to replace synthetic generation
+- Lets operators pause live generation and resume it when needed
 
-### Explainability
-- Each flagged transaction includes risk reasoning derived from transaction attributes and behavioral patterns.
-- This makes the system suitable for demonstration of analyst triage and manual review workflows rather than a black-box model only.
+## Features
 
-### Monitoring experience
-- A live overview tracks overall fraud rate, amount at risk, pending review volume, and transaction volume.
-- The dashboard visualizes volume trends, risk distribution, and merchant category performance.
-- A WebSocket live feed mirrors new incoming activity as it is generated and scored.
+### Fraud risk detection
+- Generates realistic shopping and payment events across common merchant categories
+- Uses a scikit-learn fraud classifier combined with anomaly scoring
+- Maps model output to operational risk bands: low, medium, high, and critical
+- Produces explainable reason codes and risk metadata for each flagged transaction
 
-### Review workflow
-- High-risk transactions are queued for manual decisioning.
-- Operators can approve or block transactions from the alert queue.
-- Review actions are persisted and reflected in dashboard metrics.
+### Operations workflow
+- Tracks live throughput and suspicious volumes across the last 30 minutes
+- Shows risk distribution and merchant category breakdowns
+- Lists transactions and alerts with filtering and search
+- Supports approve/block decisions that update the review state
 
-## System architecture
+### Manual data import
+- Upload CSV, XLSX, or XLS files through the Insert Data page
+- Normalizes common column aliases automatically to the internal schema
+- Pauses synthetic live generation while imported data is active
+- Rebuilds the dashboard around the imported transaction set
+
+## Architecture
 
 ### Backend
 The backend is built with Python and FastAPI.
 
-Core components:
-- `backend/data_generator.py` — generates realistic synthetic transaction activity
-- `backend/model.py` — trains and scores the fraud-risk model
-- `backend/database.py` — persists transaction data and review state
-- `backend/main.py` — exposes the API and WebSocket endpoints
-- `backend/config.py` — centralizes configuration and CORS settings
+Core files:
+- backend/main.py — API routes, startup logic, live feed, and file upload pipeline
+- backend/data_generator.py — synthetic transaction generation
+- backend/model.py — fraud model training and scoring logic
+- backend/database.py — SQLite persistence and query helpers
+- backend/config.py — app configuration and CORS setup
 
 ### Frontend
 The frontend is built with React, Vite, Tailwind CSS, and Recharts.
 
-It provides:
-- overview dashboard panels
-- transaction investigation views
-- searchable/filterable transaction tables
-- live alert queue and manual review controls
+It includes:
+- overview dashboard cards and charts
+- transaction search/filter controls
+- alert queue review actions
+- Insert Data workflow for file imports
 
 ## Tech stack
 
-- Python 3.10+
+- Python 3.11+
 - FastAPI
+- Uvicorn
 - SQLAlchemy
 - scikit-learn
-- Pandas / NumPy
-- React
+- pandas / NumPy
+- openpyxl
+- React 19
 - Vite
 - Tailwind CSS
 - Recharts
 
-## Getting started
+## Local setup
 
 ### Prerequisites
-- Python 3.10 or newer
-- Node.js 18 or newer
+- Python 3.11+
+- Node.js 18+
 - npm
 
-### 1) Start the backend
-Open a terminal in the project root and run:
+### 1) Create the backend environment
+From the project root:
 
 ```bash
-cd backend
 python -m venv .venv
 # Windows
-.venv\Scripts\activate
+.\.venv\Scripts\activate
 # macOS/Linux
 # source .venv/bin/activate
 
-pip install -r requirements.txt
-python -m uvicorn main:app --host 127.0.0.1 --port 8000
+python -m pip install --upgrade pip
+python -m pip install -r backend/requirements.txt
 ```
 
-The backend will initialize the SQLite database, train the model, and begin generating data on startup.
+### 2) Start the backend
+```bash
+cd "c:\Users\HP\Downloads\sentry_fraud-detector"
+.\.venv\Scripts\python.exe -m uvicorn main:app --app-dir .\backend --host 0.0.0.0 --port 8000
+```
 
-### 2) Start the frontend
-Open a second terminal and run:
+On macOS/Linux:
+
+```bash
+cd /path/to/sentry_fraud-detector
+source .venv/bin/activate
+uvicorn main:app --app-dir ./backend --host 0.0.0.0 --port 8000
+```
+
+The backend initializes the SQLite database, trains the fraud-risk model, and starts the synthetic transaction generator on startup.
+
+### 3) Start the frontend
+In a second terminal:
 
 ```bash
 cd frontend
@@ -116,49 +128,55 @@ npm install
 npm run dev -- --host 0.0.0.0 --port 5173
 ```
 
-Then open:
+If port 5173 is already in use, Vite will usually move to the next available port such as 5174. Open the port shown in the terminal, typically:
 
 ```text
 http://localhost:5173
 ```
 
-The frontend is configured to call the backend on `http://localhost:8000`.
+or
 
-## API overview
+```text
+http://localhost:5174
+```
 
-The backend exposes the following operational endpoints:
-- `/api/health` — service health and model status
-- `/api/stats` — key fraud KPIs
-- `/api/timeseries` — hourly transaction and fraud-rate trend data
-- `/api/risk-distribution` — count of transactions by risk band
-- `/api/category-breakdown` — flagged-rate summary by merchant category
-- `/api/transactions` — searchable, filterable transaction records
-- `/api/alerts` — pending review queue
-- `/ws/live` — live transaction stream for the dashboard
+## API endpoints
 
-## Data model and scoring logic
+The backend exposes the following routes:
 
-The system generates synthetic commerce events and scores them using a hybrid approach:
-1. a supervised classifier trained on labeled fraud patterns
-2. an unsupervised anomaly signal for irregular behavior
-3. explainable reason codes derived from the transaction attributes
+- GET /api/health — health and model status
+- GET /api/stats — summary KPIs
+- GET /api/timeseries — recent fraud trend data
+- GET /api/risk-distribution — counts by risk band
+- GET /api/category-breakdown — category-level flagged rates
+- GET /api/transactions — transaction records with filters and search
+- GET /api/alerts — pending review queue
+- POST /api/transactions/{txn_id}/review — approve or block a transaction
+- POST /api/data/stop-live-generation — pause synthetic generation
+- POST /api/data/resume-live-generation — resume synthetic generation
+- POST /api/data/upload — upload a CSV/XLSX/XLS dataset to drive the dashboard
+- WebSocket /ws/live — real-time transaction stream
 
-This allows the dashboard to show not only that something is risky, but also why it is considered risky from an operational perspective.
+## Manual import workflow
 
-## Use case
+From the frontend:
 
-This project is best understood as a fraud-monitoring command center for digital commerce teams. It demonstrates how an organization might surface suspicious payment behavior in real time, prioritize high-risk cases, and provide a simple interface for operational review.
+1. Open the Insert Data page
+2. Upload a CSV, XLSX, or XLS file
+3. The system normalizes common aliases and applies the model to each row
+4. Live synthetic generation pauses
+5. The imported rows replace the current active dataset in the dashboard
 
-Although the data is synthetic, the structure and logic map closely to real-world fraud operations workflows.
+This is useful for demos where you want to operate against a curated file instead of live generated data.
 
 ## Project status
 
-This repository is intended as a working demonstration and portfolio-ready prototype for:
-- fraud detection and operational analytics
-- ML-backed monitoring interfaces
-- dashboard-driven risk review workflows
-- end-to-end demo architecture for product showcases
+This repository is a working prototype and portfolio-ready demo for:
+- fraud detection operations
+- ML-assisted monitoring UX
+- dashboard-driven review workflows
+- synthetic data pipelines for product demos and interviews
 
 ## Notes
 
-This is a synthetic environment, not a live production payments system. It is designed to showcase architecture, data flows, and dashboard UX in a realistic way without exposing or depending on real customer or transaction data.
+The project intentionally uses synthetic data and is not connected to real payment systems or production fraud data. It is designed to showcase system architecture, operational logic, and decision-support workflows in a realistic but safe environment.
