@@ -6,7 +6,7 @@ import TransactionsTable from "./components/TransactionsTable";
 import AlertQueue from "./components/AlertQueue";
 import TransactionDrawer from "./components/TransactionDrawer";
 import InsertData from "./views/InsertData";
-import { api, useLiveFeed } from "./api";
+import { API_BASE, api, useLiveFeed } from "./api";
 
 const REFRESH_MS = 6000;
 

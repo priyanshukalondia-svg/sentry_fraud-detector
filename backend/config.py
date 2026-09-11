@@ -11,6 +11,8 @@ def _get_database_url() -> str:
 
 def _get_cors_origins() -> list[str]:
     default_origins = [
+        "https://fraudfrontend-dgtfe68ko-priyanshukalondia-8616s-projects.vercel.app",
+        "https://www.fraudfrontend-dgtfe68ko-priyanshukalondia-8616s-projects.vercel.app",
         "https://fraudfrontend-ekzm0s5r8-priyanshukalondia-8616s-projects.vercel.app",
         "https://www.fraudfrontend-ekzm0s5r8-priyanshukalondia-8616s-projects.vercel.app",
         "http://localhost:5173",
@@ -38,7 +40,7 @@ def _get_cors_origins() -> list[str]:
 def _get_cors_origin_regex() -> str | None:
     env_value = os.getenv("CORS_ORIGIN_REGEX", "")
     if not env_value:
-        return r"https?://(localhost|127\.0\.0\.1|fraudfrontend-ekzm0s5r8-priyanshukalondia-8616s-projects\.vercel\.app|fraud-detection-scheme\.onrender\.com)(:[0-9]+)?(/.*)?"
+        return r"https?://(localhost|127\.0\.0\.1|([a-z0-9-]+\.)*vercel\.app|fraud-detection-scheme\.onrender\.com)(:[0-9]+)?(/.*)?"
     return env_value
 
 
